@@ -72,7 +72,7 @@ async def friday_report(application):
     await asyncio.sleep(5)
     while True:
         now = now_moscow()
-        if now.weekday() == 1 and now.hour == 19 and now.minute == 10:
+        if now.weekday() == 1 and now.hour == 20 and now.minute == 50:
             logging.info("Настало время пятничного отчёта...")
             chat_ids = {c for (_, _, _, c) in payments}
             for chat_id in chat_ids:
