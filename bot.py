@@ -1,4 +1,3 @@
-
 import logging
 from datetime import datetime, timedelta
 import pytz
@@ -10,12 +9,15 @@ from telegram.ext import (
     ApplicationBuilder, MessageHandler, ContextTypes, filters
 )
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = "7558281182:AAHqX6h6oVpMgyIgs5ayZ0mxTv7Zw7BnSI8"
+
+# === ФУНКЦИИ СОХРАНЕНИЯ/ЗАГРУЗКИ ===
 
 def load_data():
     if os.path.exists("payments.json"):
         with open("payments.json", "r", encoding="utf-8") as f:
             loaded_payments = json.load(f)
+            # Преобразуем timestamp обратно в datetime
             loaded_payments = [(uid, name, datetime.fromisoformat(ts), cid) for uid, name, ts, cid in loaded_payments]
     else:
         loaded_payments = []
@@ -30,11 +32,17 @@ def load_data():
     return loaded_payments, loaded_participants
 
 def save_data():
+    # Сохраняем payments с преобразованием datetime → строка
     with open("payments.json", "w", encoding="utf-8") as f:
-        json.dump([(uid, name, ts.isoformat(), cid) for uid, name, ts, cid in payments], f, ensure_ascii=False, indent=2)
+        json.dump(
+            [(uid, name, ts.isoformat(), cid) for uid, name, ts, cid in payments],
+            f, ensure_ascii=False, indent=2
+        )
 
     with open("participants.json", "w", encoding="utf-8") as f:
         json.dump(participants, f, ensure_ascii=False, indent=2)
+
+# === ИНИЦИАЛИЗАЦИЯ ===
 
 payments, participants = load_data()
 
@@ -55,6 +63,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     text = update.message.text.strip()
 
+    # Сохраняем участника
     participants[user.id] = (
         user.full_name,
         f"@{user.username}" if user.username else user.full_name,
@@ -66,7 +75,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         payments.append((user.id, name, now_moscow(), chat_id))
         logging.info(f"Записана оплата от {name} в чате {chat_id}")
 
-    save_data()
+    save_data()  # сохраняем и участников, и оплаты после каждого сообщения
 
 async def friday_report(application):
     await asyncio.sleep(5)
