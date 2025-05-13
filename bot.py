@@ -61,7 +61,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_user
     chat_id = update.effective_chat.id
-    text = update.message.text.strip()
+    text = (update.message.text or update.message.caption or "").strip()
 
     # Сохраняем участника
     participants[user.id] = (
